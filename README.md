@@ -1,6 +1,6 @@
 ## The Ralph Playbook
 
-December 2025 boiled [Ralph](https://ghuntley.com/ralph/) powerful yet dumb little face to the top of most AI-related timelines.
+December 2025 boiled [Ralph's](https://ghuntley.com/ralph/) powerful yet dumb little face to the top of most AI-related timelines.
 
 I've been trying to pay attention to the smart things [@GeoffreyHuntley](https://x.com/GeoffreyHuntley) says since bumping into his crazy helpful [LLM stdlib tips](https://ghuntley.com/stdlib/) earlier this year.
 
