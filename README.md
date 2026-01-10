@@ -509,8 +509,8 @@ Still determining the value/viability of these possible enhancements, but the op
 - [Use Claude's AskUserQuestionTool for Planning](#use-claudes-askuserquestiontool-for-planning)
 - [Acceptance-Driven Backpressure](#acceptance-driven-backpressure)
 - [Non-Deterministic Backpressure](#non-deterministic-backpressure)
-- [JTBD → Story Map → SLC Release](#jtbd-story-map-slc-release)
-- [Work Branches](#work-branches)
+- [Ralph Friendly Work Branches](#ralph-friendly-work-branches)
+- [JTBD → Story Map → SLC Release](#jtbd--story-map--slc-release)
 
 ---
 
@@ -775,7 +775,7 @@ _Discovery, not documentation:_ Ralph learns LLM review patterns from `llm-revie
 
 ---
 
-### Work Branches
+### Ralph Friendly Work Branches
 
 _The Critical Principle:_ Geoff's Ralph works from a single, disposable plan where Ralph picks "most important." To use branches with Ralph while maintaining this pattern, you must scope at plan creation, not at task selection.
 
