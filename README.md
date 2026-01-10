@@ -14,16 +14,16 @@ Many folks seem to be getting good results with various shapes - but I wanted to
 
 So I dug in to really _RTFM_ on [recent videos](<(https://www.youtube.com/watch?v=O2bBWDoxO4s)>) and Geoff's [original post](https://ghuntley.com/ralph/) to try and untangle for myself what works best.
 
-Below is the result - a (likely OCD-inspired) Ralph Playbook that organizes the miscellaneous details for putting this all into practice w/o hopefully neutering it in the process.
+Below is the result - a (likely OCD-fueled) Ralph Playbook that organizes the miscellaneous details for putting this all into practice w/o hopefully neutering it in the process.
 
-> Digging into all of this has also brought to mind some possibly valuable [extensions](#enhancements) to the core approach that aim to stay aligned with the guidelines that make Ralph work so well.
+> Digging into all of this has also brought to mind some possibly valuable [additional enhancements](#enhancements) to the core approach that aim to stay aligned with the guidelines that make Ralph work so well.
 
 ---
 
 ## Table of Contents
 
 - [Workflow](#workflow)
-- [Guidelines](#guidelines)
+- [Key Principles](#key-principles)
 - [Loop Mechanics](#loop-mechanics)
 - [Files](#files)
 - [Enhancements?](#enhancements)
@@ -36,16 +36,18 @@ A picture is worth a thousand tweets and an hour-long video. Geoff's [overview h
 
 ![ralph-diagram.png](references/ralph-diagram.png)
 
-This diagram clarified for me that Ralph isn't just "a loop that codes." It's a funnel with 3 Phases, 2 Prompts, and 1 Loop.
+### 🗘 Three Phases, Two Prompts, One Loop
 
-### 1. Define Requirements (LLM conversation)
+This diagram clarified for me that Ralph isn't just "a loop that codes." It's a funnel.
+
+#### Phase 1. Define Requirements (LLM conversation)
 
 - Discuss project ideas → identify Jobs to Be Done (JTBD)
 - Break individual JTBD into topic(s) of concern
 - Use subagents to load info from URLs into context
 - LLM understands JTBD topic of concern: subagent writes `specs/FILENAME.md` for each topic
 
-### 2/3. Run Ralph Loop (two modes, swap `PROMPT.md` as needed)
+#### Phase 2 / 3. Run Ralph Loop (two modes, swap `PROMPT.md` as needed)
 
 Same loop mechanism, different prompts for different objectives:
 
@@ -88,7 +90,7 @@ _BUILDING mode loop lifecycle:_
 9. _Commit_
 10. _Loop ends_ → context cleared → next iteration starts fresh
 
-### Concepts
+#### Concepts
 
 | Term                    | Definition                                                      |
 | ----------------------- | --------------------------------------------------------------- |
@@ -119,64 +121,89 @@ _Topic Scope Test: "One Sentence Without 'And'"_
 
 ---
 
-## Guidelines
+## Key Principles
 
-- _Deterministic setup_
-  - Every loop seeds with the same files so model starts from known state (`PROMPT.md` + `AGENTS.md`)
-- _Context is precious and critical_
-  - 200K advertised → ~176K usable
-  - 40-60% context utilization for "smart zone"
-  - Allocate first ~5,000 tokens for specs
-  - Tight tasks + 1 task per loop = 100% smart zone context utilization
+### ⏳ Context Is _Everything_
+
+- When 200K+ tokens advertised = ~176K truly usable
+- And 40-60% context utilization for "smart zone"
+- Tight tasks + 1 task per loop = _100% smart zone context utilization_
+
+This informs and drives everything else:
+
 - _Use the main agent/context as a scheduler_
-  - Don't allocate expensive work to main context; spawn subagents
+  - Don't allocate expensive work to main context; spawn subagents whenever possible instead
 - _Use subagents as memory extension_
   - Each subagent gets ~156kb that's garbage collected
   - Fan out to avoid polluting main context
-- _Model selection (examples specific to Claude)_
-  - Primary agent: Opus (task selection, prioritization, coordination require strong reasoning)
-  - Subagents: Default Sonnet for efficiency (searches, summaries, simple updates)
-  - Subagents: Opus for complex reasoning (planning analysis, architectural decisions, debugging)
-  - Subagents: Possible Haiku for trivial tasks? (status checks, simple reads)
-  - Efficacy first, cost second - Opus primary prevents wasted loops
 - _Simplicity and brevity win_
   - Applies to number of parts in system, loop config, and content
   - Verbose inputs degrade determinism
 - _Prefer Markdown over JSON_
   - To define and track work, for better token efficiency
-- _Correct backpressure is critical_
-  - Anything can be wired in as back pressure to reject invalid code generation (tests, typechecks, lints, etc.)
+
+### 🧭 Steering Ralph: Patterns + Backpressure
+
+Ralph's output is steered from two directions:
+
+- _Steer upstream_
+  - Ensure deterministic setup:
+    - Allocate first ~5,000 tokens for specs
+    - Every loop's context is allocated with the same files so model starts from known state (`PROMPT.md` + `AGENTS.md`)
+  - Your existing code shapes what gets used and generated
+  - If Ralph is generating wrong patterns, add/update utilities and existing code patterns to steer it toward correct ones
+- _Steer downstream_
+  - Create backpressure to reject invalid work
+  - Wire in whatever validates your code: tests, typechecks, lints, builds, etc.
+  - Prompt says "run tests" generically. `AGENTS .md` specifies actual commands to make backpressure project-specific
+  - Backpressure can extend beyond code validation: some acceptance criteria resist programmatic checks - creative quality, aesthetics, UX feel. LLM-as-judge tests can provide backpressure for subjective criteria with binary pass/fail. ([More detailed thoughts below](#non-deterministic-backpressure) on how to approach this with Ralph.)
+- _Remind Ralph to create/use backpressure_
   - Remind Ralph to use backpressure when implementing: "Important: When authoring documentation, capture the why — tests and implementation importance."
-- _Plan is disposable_
-  - If it's wrong, throw it out, and start over
-  - Regeneration cost is one Planning loop; cheap compared to Ralph going in circles
-  - Regenerate when:
-    - Ralph is going off track (implementing wrong things, duplicating work)
-    - Plan feels stale or doesn't match current state
-    - Too much clutter from completed items
-    - You've made significant spec changes
-    - You're confused about what's actually done
+
+### 🙏 Let Ralph Ralph
+
+Ralph's effectiveness comes from how much you trust it do the right thing (eventually) and engender its ability to do so.
+
+- _Let Ralph Ralph_
+  - Lean into LLM's ability to self-identify, self-correct and self-improve
+  - Applies to implementation plan, task definition and prioritization
+  - Eventual consistency achieved through iteration
 - _Use protection_
-  - Ralph requires `--dangerously-skip-permissions` to operate autonomously - asking for approval on every tool call would break the loop. This bypasses Claude's permission system entirely - so a sandbox becomes your only security boundary.
+  - To operate autonomously, Ralph requires `--dangerously-skip-permissions` - asking for approval on every tool call would break the loop. This bypasses Claude's permission system entirely - so a sandbox becomes your only security boundary.
   - Philosophy: "It's not if it gets popped, it's when. And what is the blast radius?"
   - Running without a sandbox exposes credentials, browser cookies, SSH keys, and access tokens on your machine
   - Run in isolated environments with minimum viable access:
     - Only the API keys and deploy keys needed for the task
     - No access to private data beyond requirements
     - Restrict network connectivity where possible
-  - Options: Docker sandboxes (local), Fly Sprites/E2B/Modal (remote/production) - [additional notes](references/sandbox-environments.md)
+  - Options: Docker sandboxes (local), Fly Sprites/E2B/etc. (remote/production) - [additional notes](references/sandbox-environments.md)
   - Additional escape hatches: Ctrl+C stops the loop; `git reset --hard` reverts uncommitted changes; regenerate plan if trajectory goes wrong
-- _Let Ralph Ralph_
-  - Lean into LLM's ability to self-identify, self-correct and self-improve
-  - Applies to implementation plan, task definition and prioritization
-  - Eventual consistency achieved through iteration
-- _Add signs for Ralph_
-  - Prompts evolve through observing failure patterns
-  - When Ralph fails a specific way, add a guardrail (stdlib / instructions) to prevent it
-  - Don't let Ralph assume:
-    - "Before making changes search codebase (don't assume an item is not implemented) using parallel subagents." If you wake up to find that Ralph is doing multiple implementations, then you need to tune this step. This nondeterminism is the Achilles' heel of Ralph.
-- _Tune like a guitar_
-  - Sit outside of loop, but observe - especially early on - and adjust as needed.
+
+### 🚦 Move Outside the Loop
+
+To get the most out of Ralph, you need to get out of his way. Ralph should be doing _all_ of the work. You're job is now to sit on the loop, not in it - to engineer the setup and environment that will allow Ralph to succeed.
+
+_Observe and course correct_ – especially early on, sit and watch. What patterns emerge? Where does Ralph go wrong? What signs does he need? The prompts you start with won't be the prompts you end with - they evolve through observed failure patterns.
+
+_Tune it like a guitar_ – instead of prescribing everything upfront, observe and adjust reactively. When Ralph fails a specific way, add a sign to help him next time.
+
+But signs aren't just prompt text. They're _anything_ Ralph can discover:
+
+- Prompt guardrails - explicit instructions like "don't assume not implemented"
+- `AGENTS .md` - operational learnings about how to build/test
+- Utilities in your codebase - when you add a pattern, Ralph discovers it and follows it
+- Other discoverable, relevant inputs…
+
+And remember, _the plan is disposable:_
+
+- If it's wrong, throw it out, and start over
+- Regeneration cost is one Planning loop; cheap compared to Ralph going in circles
+- Regenerate when:
+  - Ralph is going off track (implementing wrong things, duplicating work)
+  - Plan feels stale or doesn't match current state
+  - Too much clutter from completed items
+  - You've made significant spec changes
+  - You're confused about what's actually done
 
 ---
 
@@ -674,7 +701,7 @@ interface ReviewResult {
 function createReview(config: {
   criteria: string; // What to evaluate (behavioral, observable)
   artifact: string; // Text content OR screenshot path
-  intelligence?: 'fast' | 'smart'; // Optional, defaults to 'fast'
+  intelligence?: "fast" | "smart"; // Optional, defaults to 'fast'
 }): Promise<ReviewResult>;
 ```
 
@@ -695,37 +722,38 @@ The fixture implementation selects appropriate models. (Examples are current opt
 ##### `llm-review.test.ts` - Shows Ralph how to use it (text and vision examples):
 
 ```typescript
-import { createReview } from '@/lib/llm-review';
+import { createReview } from "@/lib/llm-review";
 
 // Example 1: Text evaluation
-test('welcome message tone', async () => {
+test("welcome message tone", async () => {
   const message = generateWelcomeMessage();
   const result = await createReview({
     criteria:
-      'Message uses warm, conversational tone appropriate for design professionals while clearly conveying value proposition',
+      "Message uses warm, conversational tone appropriate for design professionals while clearly conveying value proposition",
     artifact: message, // Text content
   });
   expect(result.pass).toBe(true);
 });
 
 // Example 2: Vision evaluation (screenshot path)
-test('dashboard visual hierarchy', async () => {
-  await page.screenshot({ path: './tmp/dashboard.png' });
+test("dashboard visual hierarchy", async () => {
+  await page.screenshot({ path: "./tmp/dashboard.png" });
   const result = await createReview({
-    criteria: 'Layout demonstrates clear visual hierarchy with obvious primary action',
-    artifact: './tmp/dashboard.png', // Screenshot path
+    criteria:
+      "Layout demonstrates clear visual hierarchy with obvious primary action",
+    artifact: "./tmp/dashboard.png", // Screenshot path
   });
   expect(result.pass).toBe(true);
 });
 
 // Example 3: Smart intelligence for complex judgment
-test('brand visual consistency', async () => {
-  await page.screenshot({ path: './tmp/homepage.png' });
+test("brand visual consistency", async () => {
+  await page.screenshot({ path: "./tmp/homepage.png" });
   const result = await createReview({
     criteria:
-      'Visual design maintains professional brand identity suitable for financial services while avoiding corporate sterility',
-    artifact: './tmp/homepage.png',
-    intelligence: 'smart', // Complex aesthetic judgment
+      "Visual design maintains professional brand identity suitable for financial services while avoiding corporate sterility",
+    artifact: "./tmp/homepage.png",
+    intelligence: "smart", // Complex aesthetic judgment
   });
   expect(result.pass).toBe(true);
 });
