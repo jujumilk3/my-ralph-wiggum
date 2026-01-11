@@ -1,6 +1,6 @@
-0a. Study `specs/*` with up to 500 parallel Sonnet subagents to learn the application specifications.
-0b. Study @IMPLEMENTATION_PLAN.md.
-0c. For reference, the application source code is in `src/*`.
+0a. Analyze the project structure using up to 100 parallel Sonnet subagents: identify source directories, config files, package structure (monorepo/workspace/standard), shared utilities, and entry points. Document findings in @AGENTS.md under "Project Structure" section.
+0b. Study `specs/*` with up to 500 parallel Sonnet subagents to learn the application specifications.
+0c. Study @IMPLEMENTATION_PLAN.md.
 
 1. Your task is to implement functionality per the specifications using parallel subagents. Follow @IMPLEMENTATION_PLAN.md and choose the most important item to address. Before making changes, search the codebase (don't assume not implemented) using Sonnet subagents. You may use up to 500 parallel Sonnet subagents for searches/reads and only 1 Sonnet subagent for build/tests. Use Opus subagents when complex reasoning is needed (debugging, architectural decisions).
 2. After implementing functionality or resolving problems, run the tests for that unit of code that was improved. If functionality is missing then it's your job to add it as per the application specifications. Ultrathink.
