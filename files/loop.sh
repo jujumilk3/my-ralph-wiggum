@@ -58,6 +58,30 @@ while true; do
         --output-format=stream-json \
         --model opus \
         --verbose
+        
+
+
+    # Check for rate limit error
+    if echo "$OUTPUT" | grep -q '"error":"rate_limit"'; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "⚠️  Rate limit detected!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+        # Run fallback script once if it exists
+        FALLBACK_SCRIPT="./loop_fallback.sh"
+        if [ -f "$FALLBACK_SCRIPT" ]; then
+            echo "Running fallback script: $FALLBACK_SCRIPT"
+            bash "$FALLBACK_SCRIPT"
+        else
+            echo "No fallback script found at $FALLBACK_SCRIPT"
+        fi
+        
+        # Wait 5 minutes before retrying
+        echo "Waiting 5 minutes before retry..."
+        sleep 300
+        echo "Resuming..."
+        continue
+    fi
 
     # Push changes after each iteration
     git push origin "$CURRENT_BRANCH" || {
