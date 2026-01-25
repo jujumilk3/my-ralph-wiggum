@@ -90,5 +90,5 @@ while true; do
     }
 
     ITERATION=$((ITERATION + 1))
-    echo -e "\n\n======================== LOOP $ITERATION ========================\n"
+    echo -e "\n\n======================== LOOP $ITERATION ($(date '+%Y-%m-%d %H:%M:%S')) ========================\n"
 done
