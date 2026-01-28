@@ -11,7 +11,6 @@
 #   -f FILE     Read prompt from file
 #   -m MODEL    Model to use (opus|sonnet|haiku, default: sonnet)
 #   -g          Enable git auto-commit and push after each iteration
-#   -v          Verbose output
 #   --help      Show this help message
 #
 # Examples:
@@ -27,7 +26,6 @@ PROMPT_FILE=""
 MAX_ITERATIONS=0
 MODEL="sonnet"
 GIT_ENABLED=false
-VERBOSE=false
 ITERATION=0
 
 # Parse arguments
@@ -51,10 +49,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         -g)
             GIT_ENABLED=true
-            shift
-            ;;
-        -v)
-            VERBOSE=true
             shift
             ;;
         -*)
@@ -122,14 +116,13 @@ else
 fi
 echo "Model:  $MODEL"
 [ "$GIT_ENABLED" = true ] && echo "Git:    Enabled (branch: $CURRENT_BRANCH)"
-[ "$VERBOSE" = true ] && echo "Verbose: Enabled"
 [ $MAX_ITERATIONS -gt 0 ] && echo "Max:    $MAX_ITERATIONS iterations"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
 # Prepare Claude CLI flags
-CLAUDE_FLAGS="-p --dangerously-skip-permissions --output-format=stream-json --model $MODEL"
-[ "$VERBOSE" = true ] && CLAUDE_FLAGS="$CLAUDE_FLAGS --verbose"
+# Note: --verbose is required when using --output-format=stream-json
+CLAUDE_FLAGS="-p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
 
 # Main loop
 while true; do
