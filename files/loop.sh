@@ -40,6 +40,15 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
+# Setup output recording
+RECORDS_DIR="ralph-working-records"
+mkdir -p "$RECORDS_DIR"
+if [ ! -f "$RECORDS_DIR/.gitignore" ]; then
+    printf '*\n!.gitignore\n' > "$RECORDS_DIR/.gitignore"
+fi
+RECORD_FILE="$RECORDS_DIR/$(date '+%Y-%m-%d-%H%M%S')-$MODE.log"
+echo "Record: $RECORD_FILE"
+
 while true; do
     if [ $MAX_ITERATIONS -gt 0 ] && [ $ITERATION -ge $MAX_ITERATIONS ]; then
         echo "Reached max iterations: $MAX_ITERATIONS"
@@ -60,6 +69,7 @@ while true; do
         --verbose 2>&1)
     
     echo "$OUTPUT"
+    echo "$OUTPUT" >> "$RECORD_FILE"
 
     # Check for rate limit error
     if echo "$OUTPUT" | grep -q '"error":"rate_limit"'; then
@@ -90,5 +100,10 @@ while true; do
     }
 
     ITERATION=$((ITERATION + 1))
-    echo -e "\n\n======================== LOOP $ITERATION ($(date '+%Y-%m-%d %H:%M:%S')) ========================\n"
+    LOOP_HEADER="======================== LOOP $ITERATION ($(date '+%Y-%m-%d %H:%M:%S')) ========================"
+    echo -e "\n\n$LOOP_HEADER\n"
+    echo -e "\n\n$LOOP_HEADER\n" >> "$RECORD_FILE"
 done
+
+echo ""
+echo "Record saved: $RECORD_FILE"

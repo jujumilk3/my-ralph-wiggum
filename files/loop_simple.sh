@@ -120,6 +120,16 @@ echo "Model:  $MODEL"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# Setup output recording
+RECORDS_DIR="ralph-working-records"
+mkdir -p "$RECORDS_DIR"
+if [ ! -f "$RECORDS_DIR/.gitignore" ]; then
+    printf '*\n!.gitignore\n' > "$RECORDS_DIR/.gitignore"
+fi
+RECORD_FILE="$RECORDS_DIR/$(date '+%Y-%m-%d-%H%M%S')-simple.log"
+echo "Record: $RECORD_FILE"
+echo ""
+
 # Prepare Claude CLI flags
 # Note: --verbose is required when using --output-format=stream-json
 CLAUDE_FLAGS="-p --dangerously-skip-permissions --output-format=stream-json --model $MODEL --verbose"
@@ -136,7 +146,9 @@ while true; do
 
     ITERATION=$((ITERATION + 1))
     echo ""
-    echo "▶ Iteration $ITERATION - $(date '+%Y-%m-%d %H:%M:%S')"
+    ITER_HEADER="▶ Iteration $ITERATION - $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "$ITER_HEADER"
+    echo "$ITER_HEADER" >> "$RECORD_FILE"
     echo ""
 
     # Run Claude with prompt
@@ -147,6 +159,7 @@ while true; do
     fi
 
     echo "$OUTPUT"
+    echo "$OUTPUT" >> "$RECORD_FILE"
 
     # Check for rate limit error
     if echo "$OUTPUT" | grep -q '"error":"rate_limit"'; then
@@ -209,4 +222,5 @@ done
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Loop ended after $ITERATION iteration(s)"
+echo "Record: $RECORD_FILE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
