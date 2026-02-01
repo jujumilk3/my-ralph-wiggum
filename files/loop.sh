@@ -46,7 +46,7 @@ mkdir -p "$RECORDS_DIR"
 if [ ! -f "$RECORDS_DIR/.gitignore" ]; then
     printf '*\n!.gitignore\n' > "$RECORDS_DIR/.gitignore"
 fi
-RECORD_FILE="$RECORDS_DIR/$(date '+%Y-%m-%d-%H%M%S')-$MODE.log"
+RECORD_FILE="$RECORDS_DIR/$(date '+%Y-%m-%d-%H%M%S')-$MODE.jsonl"
 echo "Record: $RECORD_FILE"
 
 while true; do
